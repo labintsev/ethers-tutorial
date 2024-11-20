@@ -1,0 +1,15 @@
+{
+  "name": "ethers-tutorial",
+  "version": "1.0.0",
+  "description": "Проект посвящен разработке собственного обозревателя блоков сети Ethereum средствами библиотеки `ethers.js` и `React`. В качестве IDE рекомендуется VSCode, среда исполнения - node.js.   \r Точку доступа предоставляет провайдер web3gate Rostelecom.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "axios": "^1.7.7"
+  }
+}
