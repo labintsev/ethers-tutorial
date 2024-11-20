@@ -55,7 +55,7 @@ axios.post(url, payload)
     console.error(error);
   });
 ```
- Выполните запос командой 
+ Выполните запрос командой 
  ```sh
  node .\index.js
  ```
