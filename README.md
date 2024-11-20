@@ -1,12 +1,73 @@
 # Ethers tutorial - Block Explorer
 
-Проект посвящен разработке собственного обозревателя блоков сети Ethereum средствами библиотеки `ethers.js` и `React`.
+Проект посвящен разработке собственного обозревателя блоков сети Ethereum средствами библиотеки `ethers.js` и `React`. В качестве IDE рекомендуется VSCode, среда исполнения - node.js.   
+Точку доступа предоставляет провайдер web3gate Rostelecom.  
 
-## Установка приложения 
+План занятия: 
+1. Создать точку доступа и протестировать с помощью простого вызова js кода. 
+2. Создать react-приложение обозреватель блоков сети ethereum. 
+3. Добавить функционал взаимодействия со смарт-контрактами, размещенными в сети. 
+
+
+## 1. Создание точки доступа Web3Gate endpoint 
+
+Зарегистрируйтесь на портале www.web3gate.ru 
+
+![](img/1.png)
+
+Введите свой почтовый адрес, придумайте пароль и примите политику конфиденциальности.  
+
+Создайте новый Web3 Проект.  
+
+![](img/2.png)
+
+Создайте точку доступа к сети Ethereum - Sepolia  
+
+![](img/3.png)
+
+```sh
+npm init --yes 
+npm install axios
+```
+
+
+Создайте файл index.js и наполните его содержимое 
+
+```js
+const axios = require("axios");
+
+const url = `https://sepolia-eth.web3gate.ru/{api_key}`;
+
+const payload = {
+  jsonrpc: '2.0',
+  id: 1,
+  method: 'eth_blockNumber',
+  params: []
+};
+
+axios.post(url, payload)
+  .then(response => {
+    console.log('The latest block number is', parseInt(response.data.result, 16));
+  })
+  .catch(error => {
+    console.error(error);
+  });
+```
+ Выполните запос командой 
+ ```sh
+ node .\index.js
+ ```
+ В консоли должно появиться сообщение (номер блока может быть больше):
+```
+The latest block number is 7115753
+```
+Если запрос прошел успешно, перейдем к созданию приложения с пользовательским интерфейсом. 
+
+## 2. Создание react-приложения 
 
 Для фронтенда традиционно используется библиотека `React` на платформе node.js. 
 
-В качестве IDE рекомендуется VSCode.  
+
 
 Создайте новое приложение с помощью vite и перейдите в рабочий каталог:  
 ```
@@ -27,8 +88,8 @@ npm run dev
 
 Настройте стили приложения. 
 Для этого в папке src замените файл App.css и очистите содержимое index.css
-
-## 1. Настройка провайдера
+  
+### 2.1. Настройка провайдера
 Библиотека `ethers` - это компактный и функциональный инструмент для взаимодействия с блокчейном ethereum. 
 Класс `Provider` является базовой абстракцией для чтения информации о состоянии аккаунтов, событий и запуска публичных идемпотентных методов смарт-контрактов. 
 
@@ -38,7 +99,8 @@ npm run dev
 import { ethers } from "ethers";
 import './App.css'
 
-const providerUrl = 'http://77.51.210.148:48545/';
+const providerUrl = 'https://sepolia-eth.web3gate.ru/api_key';
+
 const provider = new ethers.JsonRpcProvider(providerUrl);
 const network = await provider.getNetwork();
   
@@ -55,23 +117,21 @@ export default App
 ```
 
 В окне браузера откройте панель разработчика (клавиша F12), в консоли должен появиться объект 
-```
+```js
 _Network {
 chainId: 11155111n
 name: "sepolia"
 }
 
 ```
-
-
-
-## 2. Добавьте функцию BalanceReader
+  
+### 2.2. Добавьте функцию BalanceReader 
 
 В качестве основы используем компонент `Wallet` из проекта `ecdsa-node`. 
 
 В папке src добавьте BalanceReader.jsx со следующим содержимым:
 
-```js
+```jsx 
 import { ethers } from "ethers";
 import { useState } from 'react';
 
@@ -106,12 +166,13 @@ function BalanceReader({ provider }) {
 }
 
 export default BalanceReader;
-```
+```  
+
 Подключите компонент BalanceReader в приложении App.jsx  
 
 Проверьте состояние баланса, например аккаунта '0xeE2d4c1EF974a67E16caD4B19F209697694B4010'. 
 
-## 3. Добавьте функцию обозревателя блоков
+### 2.3. Добавьте функцию обозревателя блоков 
 
  Библиотека `ethers.js` через класс `Provider ` позволяет читать состояние сети Ethereum, а именно:
 * количество блоков в блокчейне
@@ -211,7 +272,7 @@ export default BlockExplorer;
 Подключите компонент `BlockExplorer` в приложении `App.jsx`.  
 
 
-## 4. Добавьте функцию VendingMachine
+## 3. Добавьте функцию VendingMachine
 
 Класс `Contract` позволяет взаимодействовать со смарт-контрактами, размещенными в сети Ethereum. 
 Список верифицированных смарт-контрактов можно найти в обозревателе [sepolia.etherscan](https://sepolia.etherscan.io/contractsVerified)
@@ -356,6 +417,13 @@ async function purchaseCupcakes(evt) {
 </form>
 <div className="balance">YOU HAVE: {accountCups} {symbol} </div> 
 ```
+
+
+### 3.2 Совершение платных вызовов через кошелек MetaMask 
+
+
+
+
 ## Заключение
 Мы познакомились с основными возможностями библиотеки `ethers.js`. 
 В качестве домашнего задания выберите любой верифицированный смарт-контракт в тестовой сети sepolia. 
