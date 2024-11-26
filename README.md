@@ -1,7 +1,9 @@
 # Ethers tutorial - Block Explorer
 
-Проект посвящен разработке собственного обозревателя блоков сети Ethereum средствами библиотеки `ethers.js` и `React`. В качестве IDE рекомендуется VSCode, среда исполнения - node.js.   
-Точку доступа предоставляет провайдер web3gate Rostelecom.  
+Проект посвящен основам работы с провайдером web3gate и библиотекой `ethers.js`. 
+Мы разработаем собственный обозреватель блоков сети Ethereum и интерфейс для взаимодействия со смарт контрактами на `React`. 
+В качестве IDE рекомендуется VSCode, среда исполнения - node.js.   
+Точку доступа к тестовой сети Ethereum sepolia предоставляет провайдер web3gate компании Rostelecom.  
 
 План занятия: 
 1. Создать точку доступа и протестировать с помощью простого вызова js кода. 
@@ -55,7 +57,9 @@ axios.post(url, payload)
     console.error(error);
   });
 ```
+
  Выполните запрос командой 
+
  ```sh
  node .\index.js
  ```
@@ -68,11 +72,10 @@ The latest block number is 7115753
 ## 2. Создание react-приложения 
 
 Для фронтенда традиционно используется библиотека `React` на платформе node.js. 
-
-
+Актуальная версия реакта - 18.3.  
 
 Создайте новое приложение с помощью vite и перейдите в рабочий каталог:  
-```
+```sh
 npm create vite@latest dapp -- --template react
 cd dapp
 ```
@@ -84,12 +87,15 @@ cd dapp
 npm install
 npm run dev
 ``` 
-Если в браузере Chrome блокируется localhost по протоколу http, можно отключить правило безопасности для локальной разработки. 
+Перейдите по ссылке `http://localhost:5173/`. 
+Если  localhost блокируется по протоколу http, нужно отключить правило безопасности для локальной разработки. 
+Рассмотрим пример с браузером Chrome.  
 Откройте новую вкладку с адресом `chrome://net-internals/#hsts`.   
 В разделе `Delete domain security policies` введите `localhost` и нажмите кнопку `Delete`.  
+После этого закройте и снова откройте вкладку `http://localhost:5173/`, должно заработать. 
 
-Настройте стили приложения. 
-Для этого в папке src замените файл App.css и очистите содержимое index.css
+И наконец, настройте стили приложения. 
+Для этого в папке src замените содержимое файла App.css на то, что лежит в корне проекта и очистите содержимое файла index.css.
   
 ### 2.1. Настройка провайдера
 Библиотека `ethers` - это компактный и функциональный инструмент для взаимодействия с блокчейном ethereum. 
@@ -115,7 +121,6 @@ function App() {
 }
 
 export default App
-
 ```
 
 В окне браузера откройте панель разработчика (клавиша F12), в консоли должен появиться объект 
@@ -126,10 +131,43 @@ name: "sepolia"
 }
 
 ```
+
+Перепишем функцию App с использованием хуков React useState и useEffect: 
+```js
+import { ethers } from "ethers";
+import './App.css'
+import { useEffect, useState } from "react";
+
+
+function App() {
+  const [networkId, setNetworkId] = useState(0);
+  const providerUrl = 'https://sepolia-eth.web3gate.ru/api-key';
+  const provider = new ethers.JsonRpcProvider(providerUrl);
+  
+  useEffect(()=>{
+    async function fetchNetId(){
+      const network = await provider.getNetwork();
+      console.log(network.chainId);
+      setNetworkId(parseInt(network.chainId));
+    }
+    fetchNetId();
+  })
+
+  return (
+    <>
+    <h1>Hello, Dapp!</h1>
+    <p>Network ID: {networkId}</p>
+    </>
+  )
+}
+
+export default App
+
+```
   
 ### 2.2. Добавьте функцию BalanceReader 
 
-В качестве основы используем компонент `Wallet` из проекта `ecdsa-node`. 
+В качестве основы используем компонент `Wallet` из предыдущего проекта `ecdsa-node`. 
 
 В папке src добавьте BalanceReader.jsx со следующим содержимым:
 
@@ -186,7 +224,7 @@ export default BalanceReader;
 Наиболее популярный обозреватель блоков сети Ethereum - [Etherscan](https://etherscan.io/). 
 Проверьте как он работает, это поможет при самостоятельной реализации функций собственного обозревателя блоков. 
 
-Мы разработаем компонент, который позволит: 
+Мы разработаем компонент `BlockExplorer.jsx`, который позволит: 
 - Вывести список из 3 последних блоков. 
 - По клику на блоке вывести его содержимое - заголовки транзакций. 
 - По клику на заголовке транзакции вывести детали транзакции.
@@ -228,6 +266,7 @@ function Block({blocknum, provider}) {
 
 export default Block; 
 ```
+
 Этот компонент позволяет отобразить хеш текущего и предыдущего блока по его номеру. 
 Вы можете добавить любую информацию о блоке, которая доступна через методы класса [Block](https://docs.ethers.org/v6/api/providers/#Block).  
 
@@ -274,11 +313,12 @@ export default BlockExplorer;
 Подключите компонент `BlockExplorer` в приложении `App.jsx`.  
 
 
-## 3. Добавьте функцию VendingMachine
+## 3. Взаимодействие со смарт-контрактами, размещенными в сети 
 
-Класс `Contract` позволяет взаимодействовать со смарт-контрактами, размещенными в сети Ethereum. 
+Класс `Contract` библиотеки `ethers.js` позволяет взаимодействовать со смарт-контрактами, размещенными в сети Ethereum. 
 Список верифицированных смарт-контрактов можно найти в обозревателе [sepolia.etherscan](https://sepolia.etherscan.io/contractsVerified)
-Взаимодействие со смарт-контрактом идет через бинарный интерфейс (ABI, application binary interface), через библиотеку ethers. 
+Взаимодействие со смарт-контрактом идет через бинарный интерфейс (ABI, application binary interface). 
+Библиотека ethers преобразует вызов js-методов в вызов методов ABI смарт-контракта. 
 
 Добавьте компонент `VendingMachine.jsx` со следующим содержимым: 
 ```js
@@ -293,7 +333,6 @@ const abi = [
     "function purchase(uint amount) payable returns ()"
   ];
   
-
 function VendingMachine({ provider }) {
     const [writableContract, setWritableContract] = useState();
     const [address, setAddress] = useState("");
@@ -303,31 +342,24 @@ function VendingMachine({ provider }) {
     const [accountCups, setAccounCups] = useState(0);
 
     useEffect(() => {
-        if (!symbol)  { updateVendingMachineState() }
-        if (writableContract) { updateAccountCups() }
-      }, [symbol, writableContract] );
-
-    const setValue = (setter) => (evt) => setter(evt.target.value);
+        async function updateVendingMachineState(contract) {
+            const symbol = await contract.symbol();
+            setSymbol(symbol);
+            console.log(symbol);
     
-    async function updateVendingMachineState() {
-        const readOnlyContract = new ethers.Contract(vmContractAddress, abi, provider);
-        console.log(readOnlyContract);
-
-        const symbol = await readOnlyContract.symbol();
-        setSymbol(symbol);
-        console.log(symbol);
-
-        const cupsInMachine = await readOnlyContract.getVendingMachineBalance();
-        setCupsInMachine(cupsInMachine.toString());
-        console.log(cupsInMachine);
-    }
+            const cupsInMachine = await contract.getVendingMachineBalance();
+            setCupsInMachine(cupsInMachine.toString());
+            console.log(cupsInMachine);
+        }
+        const contract = new ethers.Contract(vendingContractAddress, abi, provider);
+        updateVendingMachineState(contract); 
+    }, [symbol, cupsInMachine] );
 
     return (
         <>
         <div className="container">
             <h1>Vending Machine</h1>
             <div className="balance">TOTAL: {cupsInMachine} {symbol} </div>
-
         </div>
         </>
 
@@ -340,60 +372,58 @@ export default VendingMachine;
 Через публичного провайдера можно подключиться к смарт-контракту и прочитать его состояние:    
 `const readOnlyContract = new ethers.Contract(vmContractAddress, abi, provider);`  
 
+### 3.2 Совершение платных вызовов через кошелек MetaMask 
+
 Для изменения состояния потребуется подключение кошелька, например, MetaMask. 
 Добавьте функции для покупки виртуальных пирожных. 
 
 ```js 
 
 ...
+    const setValue = (setter) => (evt) => setter(evt.target.value);
 
-async function connectWallet(evt){
-    evt.preventDefault();
-    try {
-        const walletProvider = new ethers.BrowserProvider(window.ethereum);
-        console.log(walletProvider);
-
-        const signer = await walletProvider.getSigner(); 
-        console.log("Wallet signer: ", signer);
-
-        const address = signer.address;
-        setAddress(address)
-        console.log("Wallet address: ", address);
-
-        const writableContract = new ethers.Contract(vmContractAddress, abi, signer);
-        setWritableContract(writableContract)
-        console.log("Writable contract: ", writableContract);
-    } catch (exeption){
-        alert(exeption);
+    async function updateAccountCups(contract){
+        try {
+            const accountCups = await contract.balanceOf(address);
+            setAccountCups(accountCups.toString());
+            console.log(accountCups);
+        } catch (exeption){
+            alert(exeption);
+        }
     }
-}
 
-async function updateAccountCups(){
-    try {
-        const accountCups = await writableContract.balanceOf(address);
-        setAccounCups(accountCups.toString());
-        console.log(accountCups);
-    } catch (exeption){
-        alert(exeption);
+    async function connectWallet(evt){
+        evt.preventDefault();
+        try {
+            const bProvider = new ethers.BrowserProvider(window.ethereum);
+            console.log('Connect to wallet with provider: ', bProvider);
+            const signer = await bProvider.getSigner(); 
+            console.log("Signer is: ", signer);
+            const address = signer.address;
+            setAddress(address)
+            console.log("Wallet address: ", address);
+        } catch (exeption){
+            alert(exeption);
+        }
     }
-}
-
-async function purchaseCupcakes(evt) {
-    evt.preventDefault();
-    try {
-        console.log(writableContract);
-        const tx = await writableContract.purchase(
-            purchaseCups, 
-            { value: ethers.parseUnits(purchaseCups, 'gwei') }
-        );
-        await tx.wait();
-        updateAccountCups();
-        updateVendingMachineState();
-    } catch (exeption) {
-        alert(exeption);
+        
+    async function purchaseCupcakes(evt) {
+        evt.preventDefault();
+        try {
+            const bProvider = new ethers.BrowserProvider(window.ethereum);
+            const signer = await bProvider.getSigner(); 
+            const contract = new ethers.Contract(vendingContractAddress, abi, signer);
+            const tx = await contract.purchase(
+                purchaseCups, 
+                { value: ethers.parseUnits(purchaseCups, 'gwei') }
+            );
+            await tx.wait();
+            updateAccountCups(contract);
+        } catch (exeption) {
+            alert(exeption);
+        }
     }
-}
-
+    
 ...
 
 <form>
@@ -419,11 +449,6 @@ async function purchaseCupcakes(evt) {
 </form>
 <div className="balance">YOU HAVE: {accountCups} {symbol} </div> 
 ```
-
-
-### 3.2 Совершение платных вызовов через кошелек MetaMask 
-
-
 
 
 ## Заключение
