@@ -338,7 +338,6 @@ const abi = [
   ];
   
 function VendingMachine({ provider }) {
-    const [writableContract, setWritableContract] = useState();
     const [address, setAddress] = useState("");
     const [symbol, setSymbol] = useState("");
     const [cupsInMachine, setCupsInMachine] = useState(0);
@@ -437,6 +436,7 @@ export default VendingMachine;
         value="Connect Wallet"
         onClick={ connectWallet } 
         />
+    <div className="balance"> {address}: {accountCups} {symbol} </div> 
     <label>Purchase Cupcakes
     <input
         placeholder="1, 2, 3..."
@@ -450,7 +450,6 @@ export default VendingMachine;
         value="Purchase"
         onClick={purchaseCupcakes} />
 </form>
-<div className="balance">YOU HAVE: {accountCups} {symbol} </div> 
 ```
 
 
