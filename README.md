@@ -355,7 +355,7 @@ function VendingMachine({ provider }) {
             setCupsInMachine(cupsInMachine.toString());
             console.log(cupsInMachine);
         }
-        const contract = new ethers.Contract(vendingContractAddress, abi, provider);
+        const contract = new ethers.Contract(vmContractAddress, abi, provider);
         updateVendingMachineState(contract); 
     }, [symbol, cupsInMachine] );
 
