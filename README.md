@@ -343,7 +343,7 @@ function VendingMachine({ provider }) {
     const [symbol, setSymbol] = useState("");
     const [cupsInMachine, setCupsInMachine] = useState(0);
     const [purchaseCups, setPurchaseCups] = useState("");
-    const [accountCups, setAccounCups] = useState(0);
+    const [accountCups, setAccountCups] = useState(0);
 
     useEffect(() => {
         async function updateVendingMachineState(contract) {
