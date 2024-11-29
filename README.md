@@ -329,7 +329,7 @@ export default BlockExplorer;
 import { useState, useEffect } from "react";
 import { ethers } from "ethers";
 
-const vmContractAddress = "0x0D17C16BB7bD73Ef868cD452A1B10D069685249f";
+const vmContractAddress = "0x5e16FB1784abd2a33ca84D259AcE9e1cAE55416c";
 const abi = [
     "function symbol() view returns (string)",
     "function getVendingMachineBalance() view returns (uint)",
