@@ -416,7 +416,7 @@ export default VendingMachine;
         try {
             const bProvider = new ethers.BrowserProvider(window.ethereum);
             const signer = await bProvider.getSigner(); 
-            const contract = new ethers.Contract(vendingContractAddress, abi, signer);
+            const contract = new ethers.Contract(vmContractAddress, abi, signer);
             const tx = await contract.purchase(
                 purchaseCups, 
                 { value: ethers.parseUnits(purchaseCups, 'gwei') }
@@ -448,8 +448,7 @@ export default VendingMachine;
         type="submit" 
         className="button" 
         value="Purchase"
-        onClick={purchaseCupcakes} 
-        disabled={ !writableContract } />
+        onClick={purchaseCupcakes} />
 </form>
 <div className="balance">YOU HAVE: {accountCups} {symbol} </div> 
 ```
